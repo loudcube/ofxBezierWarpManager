@@ -18,6 +18,7 @@ public:
     int no;
     int layer;
     ofFbo *fbo;
+    ofFbo m_resultFbo;
 	ofPoint corners[4];
 	ofPoint anchors[8];
     ofPoint center;
@@ -37,6 +38,17 @@ public:
     void setup(ofFbo* _fbo);
 	void update(); // if you need
 	void draw();
+    void setShader(ofShader* edgeBlendShader)
+    {
+        m_edgeBlendShader = edgeBlendShader;
+        edgeBlendExponent = 1.4;
+        edgeBlendGamma = 1.8;
+        edgeBlendLuminance = 0.0;
+        edgeBlendAmountLeft = 0.0;
+        edgeBlendAmountRight = 0.0;
+        edgeBlendAmountTop = 0.0;
+        edgeBlendAmountBottom = 0.0;
+    }
 	
     void resetAnchors();
 	void save();
@@ -49,7 +61,16 @@ public:
     void setCanvasSize(int _width, int _height);
     void setWarpResolution(int _res);
     void setGridVisible(bool _visible);
-    bool bGradient;
+    
+//    bool bGradient;
+    
+    float edgeBlendExponent;
+    float edgeBlendAmountLeft;
+    float edgeBlendAmountRight;
+    float edgeBlendAmountTop;
+    float edgeBlendAmountBottom;
+    float edgeBlendGamma;
+    float edgeBlendLuminance;
     
 private:
 	int mousePosX, mousePosY, rad;
@@ -58,11 +79,12 @@ private:
     void setup();
     void setup(int _width, int _height);
     void setup(int _width, int _height, int grid, int _layer);
+
     void draw(ofTexture texture);
     void defaults();
 	void sprites();
 	float bezierPoint(float x0, float x1, float x2, float x3, float t);
     void drawGrid(float _stepX, float _stepY);
     
-    
+    ofShader* m_edgeBlendShader;
 };

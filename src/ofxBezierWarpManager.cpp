@@ -1,8 +1,16 @@
 #include "ofxBezierWarpManager.h"
 
+
+
+void ofxBezierWarpManager::loadShaders()
+{
+    m_edgeBlendShader.load("shaders/blend.vert", "shaders/blend.frag");
+    
+}
+
 //--------------------------------------------------------------
 ofxBezierWarpManager::ofxBezierWarpManager(){
-    bBezierGuide = true;
+    bBezierGuide = false;
 }
 
 //--------------------------------------------------------------
@@ -62,8 +70,11 @@ void ofxBezierWarpManager::mousePressed(int x, int y, int button){
 void ofxBezierWarpManager::addFbo(ofFbo* _fbo){
     cout << "[ofxBezierWarpManager] addFbo(ofFbo* _fbo)" << endl;
     ofxBezierWarp _bezier;
+    
     _bezier.setup(_fbo);
     _bezier.setWarpResolution(warpResolution);
+    _bezier.setShader(&m_edgeBlendShader);
+    _bezier.setGridVisible(bBezierGuide);
     bezierList.push_back(_bezier);
 }
 
@@ -75,7 +86,7 @@ void ofxBezierWarpManager::removeFbo(){
 //--------------------------------------------------------------
 void ofxBezierWarpManager::clear(){
     bezierList.clear();
-    maskList.clear();
+   // maskList.clear();
 }
 
 //--------------------------------------------------------------

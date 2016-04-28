@@ -16,6 +16,7 @@ void ofxBezierWarp::setup() {
 void ofxBezierWarp::setup(ofFbo* _fbo) {
     fbo = _fbo;
     setup(fbo->getWidth(), fbo->getHeight(), 10, 0);
+    m_resultFbo.allocate(fbo->getWidth(), fbo->getHeight());
 }
 
 void ofxBezierWarp::setup(int _width, int _height) {
@@ -92,19 +93,53 @@ void ofxBezierWarp::update() {
 }
 
 void ofxBezierWarp::draw() {
-    if(spritesON == 1){
-        ofPushStyle();
-        fbo->begin();
-        drawGrid(gridRes, gridRes);
-        fbo->end();
-        ofPopStyle();
-    }
     
-    // when fbo is null
-    if(!fbo) return;
+    m_resultFbo.begin();
+    ofClear(0);
+    
+    
+        ////////////////////
+                ofEnableAlphaBlending();
+                m_edgeBlendShader->begin();
+                m_edgeBlendShader->setUniformTexture ("tex", fbo->getTextureReference(), 0);
+                m_edgeBlendShader->setUniform1f("exponent", edgeBlendExponent);
+                m_edgeBlendShader->setUniform1f("userGamma", edgeBlendGamma);
+                m_edgeBlendShader->setUniform3f("userLuminance", edgeBlendLuminance, edgeBlendLuminance, edgeBlendLuminance);
+                m_edgeBlendShader->setUniform4f("amount", edgeBlendAmountLeft, edgeBlendAmountTop, edgeBlendAmountRight, edgeBlendAmountBottom);
+                m_edgeBlendShader->setUniform1i("w", fbo->getWidth());
+                m_edgeBlendShader->setUniform1i("h", fbo->getHeight());
+    
+    //set ofColor to white
+                ofSetColor(255,255,255);
+                fbo->draw(0,0);
+                ofDisableAlphaBlending();
+        
+    
+        m_edgeBlendShader->end();
+    
+        if(spritesON == 1){
+            ofPushStyle();
+            drawGrid(gridRes, gridRes);
+            ofPopStyle();
+        }
+    
+     m_resultFbo.end();
+    
+
+
+    
+    //m_resultFbo.begin();
+    //ofClear(0);
+
     
     // draw bezier
-    draw(fbo->getTextureReference());
+    draw(m_resultFbo.getTextureReference());
+
+    
+
+    
+    
+    
 }
 
 void ofxBezierWarp::draw(ofTexture tex) {
@@ -179,16 +214,16 @@ void ofxBezierWarp::sprites() {
 				ofSetColor(0, 255, 0, 150);
 				ofFill();
                 ofSetLineWidth(2);
-				ofCircle(corners[i].x, corners[i].y, rad);
+				ofDrawCircle(corners[i].x, corners[i].y, rad);
 				ofDisableAlphaBlending();
 				ofPopStyle();
 				ofPushStyle();
 				ofSetColor(255, 100, 0);
 				ofNoFill();
                 ofSetLineWidth(2);
-				ofCircle(corners[i].x, corners[i].y, rad);
-				ofLine(corners[i].x, corners[i].y - (rad) - 5, corners[i].x, corners[i].y + (rad) + 5);
-				ofLine(corners[i].x - (rad) - 5, corners[i].y, corners[i].x + (rad) + 5, corners[i].y);
+				ofDrawCircle(corners[i].x, corners[i].y, rad);
+				ofDrawLine(corners[i].x, corners[i].y - (rad) - 5, corners[i].x, corners[i].y + (rad) + 5);
+				ofDrawLine(corners[i].x - (rad) - 5, corners[i].y, corners[i].x + (rad) + 5, corners[i].y);
 				ofPopStyle();
 			} else {
 				ofPushStyle();
@@ -196,9 +231,9 @@ void ofxBezierWarp::sprites() {
                 if(selectedCenter) ofSetColor(255, 100, 0);
 				ofNoFill();
                 ofSetLineWidth(2);
-				ofCircle(corners[i].x, corners[i].y, rad);
-				ofLine(corners[i].x, corners[i].y - (rad) - 5, corners[i].x, corners[i].y + (rad) + 5);
-				ofLine(corners[i].x - (rad) - 5, corners[i].y, corners[i].x + (rad) + 5, corners[i].y);
+				ofDrawCircle(corners[i].x, corners[i].y, rad);
+				ofDrawLine(corners[i].x, corners[i].y - (rad) - 5, corners[i].x, corners[i].y + (rad) + 5);
+				ofDrawLine(corners[i].x - (rad) - 5, corners[i].y, corners[i].x + (rad) + 5, corners[i].y);
 				ofPopStyle();
 			}		      
 		}
@@ -212,7 +247,7 @@ void ofxBezierWarp::sprites() {
                     ofSetColor(0, 255, 0, 150);
                     ofFill();
                     ofSetLineWidth(2);
-                    ofCircle(anchors[i].x, anchors[i].y, rad/2);
+                    ofDrawCircle(anchors[i].x, anchors[i].y, rad/2);
                     ofDisableAlphaBlending();
                     ofPopStyle();
 
@@ -220,8 +255,8 @@ void ofxBezierWarp::sprites() {
                     ofNoFill();
                     ofSetLineWidth(2);
                     ofSetColor(255, 100, 0);
-                    ofCircle(anchors[i].x, anchors[i].y, rad/2);
-                    ofLine(corners[i/2].x, corners[i/2].y, anchors[i].x, anchors[i].y);
+                    ofDrawCircle(anchors[i].x, anchors[i].y, rad/2);
+                    ofDrawLine(corners[i/2].x, corners[i/2].y, anchors[i].x, anchors[i].y);
                     ofPopStyle();
                 }
                 
@@ -231,9 +266,10 @@ void ofxBezierWarp::sprites() {
                 ofSetColor(0, 255, 0);
                 if((i % 2) == 0) {
                     if(anchorControl == 1){
-                        ofBezier(corners[i/2].x, corners[i/2].y, anchors[(i+1) % 8].x, anchors[(i+1) % 8].y, anchors[(i+2) % 8].x, anchors[(i+2) % 8].y, corners[((i/2)+1) % 4].x, corners[((i/2)+1) % 4].y);
+                        
+                        ofDrawBezier(corners[i/2].x, corners[i/2].y, anchors[(i+1) % 8].x, anchors[(i+1) % 8].y, anchors[(i+2) % 8].x, anchors[(i+2) % 8].y, corners[((i/2)+1) % 4].x, corners[((i/2)+1) % 4].y);
                     }else{
-                        ofLine(corners[i/2].x, corners[i/2].y, corners[((i/2)+1) % 4].x, corners[((i/2)+1) % 4].y);
+                        ofDrawLine(corners[i/2].x, corners[i/2].y, corners[((i/2)+1) % 4].x, corners[((i/2)+1) % 4].y);
                     }
                 }
                 ofPopStyle();
@@ -244,8 +280,8 @@ void ofxBezierWarp::sprites() {
                     ofSetLineWidth(2);
                     ofSetColor(0, 255, 255);
                     if(selectedCenter) ofSetColor(255, 100, 0);
-                    ofCircle(anchors[i].x, anchors[i].y, rad/2);
-                    ofLine(corners[i/2].x, corners[i/2].y, anchors[i].x, anchors[i].y);
+                    ofDrawCircle(anchors[i].x, anchors[i].y, rad/2);
+                    ofDrawLine(corners[i/2].x, corners[i/2].y, anchors[i].x, anchors[i].y);
                     ofPopStyle();
                 }
                 
@@ -256,9 +292,9 @@ void ofxBezierWarp::sprites() {
                 if(selectedCenter) ofSetColor(255, 100, 0);
                 if((i % 2) == 0) {
                     if(anchorControl == 1){
-                        ofBezier(corners[i/2].x, corners[i/2].y, anchors[(i+1) % 8].x, anchors[(i+1) % 8].y, anchors[(i+2) % 8].x, anchors[(i+2) % 8].y, corners[((i/2)+1) % 4].x, corners[((i/2)+1) % 4].y);
+                        ofDrawBezier(corners[i/2].x, corners[i/2].y, anchors[(i+1) % 8].x, anchors[(i+1) % 8].y, anchors[(i+2) % 8].x, anchors[(i+2) % 8].y, corners[((i/2)+1) % 4].x, corners[((i/2)+1) % 4].y);
                     }else{
-                        ofLine(corners[i/2].x, corners[i/2].y, corners[((i/2)+1) % 4].x, corners[((i/2)+1) % 4].y);
+                        ofDrawLine(corners[i/2].x, corners[i/2].y, corners[((i/2)+1) % 4].x, corners[((i/2)+1) % 4].y);
                     }
                 }
                 ofPopStyle();
@@ -286,7 +322,7 @@ void ofxBezierWarp::sprites() {
         }else{
             ofSetColor(0, 255, 0, 200);
         }
-        ofCircle(center, rad * 2);
+        ofDrawCircle(center, rad * 2);
         ofDisableAlphaBlending();
         ofPopStyle();
         
@@ -495,12 +531,12 @@ void ofxBezierWarp::drawGrid(float _stepX, float _stepY)
     for( int y = 0; y <= h; y+=perY){
         ofSetColor(255, 255, 255, 100);
         ofSetLineWidth(4);
-        ofLine(0, y, w, y);
+        ofDrawLine(0, y, w, y);
     }
     for( int x = 0; x <= w; x+=perX){
         ofSetColor(255, 255, 255, 100);
         ofSetLineWidth(4);
-        ofLine(x, 0, x, h);
+        ofDrawLine(x, 0, x, h);
     }
     ofPopStyle();
 }

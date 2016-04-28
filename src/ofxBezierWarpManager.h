@@ -26,6 +26,8 @@ class ofxBezierWarpManager{
 		void mousePressed(int x, int y, int button);
 		void mouseReleased(int x, int y, int button);
     
+    void loadShaders();
+    
     void addFbo(ofFbo* _fbo);
     void removeFbo();
     void clear();
@@ -37,12 +39,15 @@ class ofxBezierWarpManager{
     void toggleGuideVisible(int _bezierNum = -1);
     
     vector<ofxBezierWarp> bezierList;
-    vector<ofxBezierWarp> maskList;
+    //vector<ofxBezierWarp> maskList;
     
     int warpResolution;
     bool bBezierGuide;
-    bool bGradient;
-    ofImage gradientImg;
-    ofFbo gradientFbo;
-    ofFbo blackFbo;
+    
+    ofShader m_edgeBlendShader;
+    
+//    bool bGradient;
+//    ofImage gradientImg;
+//    ofFbo gradientFbo;
+//    ofFbo blackFbo;
 };
