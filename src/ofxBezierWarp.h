@@ -56,7 +56,7 @@ public:
 	void mousePressed(int x, int y, int button);
 	void mouseDragged(int x, int y, int button);
 	void keyPressed(int clef);
-    Boolean isSelected();
+    bool isSelected();
     
     void setCanvasSize(int _width, int _height);
     void setWarpResolution(int _res);

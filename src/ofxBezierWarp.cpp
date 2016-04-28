@@ -482,7 +482,7 @@ void ofxBezierWarp::keyPressed(int key) {
 	}
 }
 
-Boolean ofxBezierWarp::isSelected(){
+bool ofxBezierWarp::isSelected(){
     int _sum = 0;
     _sum += selectedCenter;
     for (int i=0; i<4; i++) {
