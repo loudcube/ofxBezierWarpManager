@@ -100,14 +100,14 @@ void ofxBezierWarp::draw() {
     
         ////////////////////
                 ofEnableAlphaBlending();
-                m_edgeBlendShader->begin();
-                m_edgeBlendShader->setUniformTexture ("tex", fbo->getTextureReference(), 0);
-                m_edgeBlendShader->setUniform1f("exponent", edgeBlendExponent);
-                m_edgeBlendShader->setUniform1f("userGamma", edgeBlendGamma);
-                m_edgeBlendShader->setUniform3f("userLuminance", edgeBlendLuminance, edgeBlendLuminance, edgeBlendLuminance);
-                m_edgeBlendShader->setUniform4f("amount", edgeBlendAmountLeft, edgeBlendAmountTop, edgeBlendAmountRight, edgeBlendAmountBottom);
-                m_edgeBlendShader->setUniform1i("w", fbo->getWidth());
-                m_edgeBlendShader->setUniform1i("h", fbo->getHeight());
+                //m_edgeBlendShader->begin();
+                //m_edgeBlendShader->setUniformTexture ("tex", fbo->getTextureReference(), 0);
+                //m_edgeBlendShader->setUniform1f("exponent", edgeBlendExponent);
+                //m_edgeBlendShader->setUniform1f("userGamma", edgeBlendGamma);
+                //m_edgeBlendShader->setUniform3f("userLuminance", edgeBlendLuminance, edgeBlendLuminance, edgeBlendLuminance);
+                //m_edgeBlendShader->setUniform4f("amount", edgeBlendAmountLeft, edgeBlendAmountTop, edgeBlendAmountRight, edgeBlendAmountBottom);
+                //m_edgeBlendShader->setUniform1i("w", fbo->getWidth());
+                //m_edgeBlendShader->setUniform1i("h", fbo->getHeight());
     
     //set ofColor to white
                 ofSetColor(255,255,255);
@@ -115,7 +115,7 @@ void ofxBezierWarp::draw() {
                 ofDisableAlphaBlending();
         
     
-        m_edgeBlendShader->end();
+        //m_edgeBlendShader->end();
     
         if(spritesON == 1){
             ofPushStyle();

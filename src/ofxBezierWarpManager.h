@@ -43,6 +43,9 @@ class ofxBezierWarpManager{
     
     int warpResolution;
     bool bBezierGuide;
+
+
+private:
     
     ofShader m_edgeBlendShader;
     
