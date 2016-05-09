@@ -15,37 +15,32 @@
 class ofxBezierWarp{
 
 public:
-    int no;
-    int layer;
-    ofFbo *fbo;
-    ofFbo m_resultFbo;
-	ofPoint corners[4];
-	ofPoint anchors[8];
-    ofPoint center;
-	int gridRes;
-    int prev_gridRes;
-    int mouseON, spritesON, anchorControl;
-    int selectedSprite[4], selectedControlPoint[8], selectedCenter;
-    bool showGrid;
-		
 	ofxBezierWarp() {
 		no = 0;
 		layer = 0;
 		gridRes = 0;
 		prev_gridRes = 0;
+		screen_pos_x = 0;
+		screen_pos_y = 0.0f;
+		screen_scale_x = 1.0f;
+		screen_scale_y = 1.0f;
 	}
 	
-    void setup(ofFbo* _fbo);
+    //void setup(ofFbo* _fbo);
+	//void setup();
+	//void setup(int _width, int _height);
+	void setup(int _width, int _height, ofPtr<ofFbo> screenFboPtr, int grid = 10, int _layer = 0);
+	
 	void update(); // if you need
 	void draw();
     void setShader(ofShader* edgeBlendShader)
     {
         m_edgeBlendShader = edgeBlendShader;
-        edgeBlendExponent = 1.4;
+        edgeBlendExponent = 1.0;
         edgeBlendGamma = 1.8;
         edgeBlendLuminance = 0.0;
-        edgeBlendAmountLeft = 0.0;
-        edgeBlendAmountRight = 0.0;
+        edgeBlendAmountLeft = 0.2f;
+        edgeBlendAmountRight = 0.2f;
         edgeBlendAmountTop = 0.0;
         edgeBlendAmountBottom = 0.0;
     }
@@ -64,21 +59,49 @@ public:
     
 //    bool bGradient;
     
-    float edgeBlendExponent;
+	////////////
+	float edgeBlendExponent;
     float edgeBlendAmountLeft;
     float edgeBlendAmountRight;
     float edgeBlendAmountTop;
     float edgeBlendAmountBottom;
     float edgeBlendGamma;
     float edgeBlendLuminance;
-    
+	////////////
+	//screen fbo position,scale
+	float screen_pos_x;
+	float screen_pos_y;
+	float screen_scale_x;
+	float screen_scale_y;
+
+	///////////
+
+	///////////
+	ofPoint corners[4];
+	ofPoint anchors[8];
+	int anchorControl;
+	int prev_gridRes;
+	int gridRes;
+	bool showGrid;
+
+
+
 private:
+	int no;
+	int layer;
+	ofFbo m_srcFbo;
+	ofFbo m_resultFbo;
+
+	ofPtr<ofFbo> m_screenFboPtr;
+
+	ofPoint center;
+	
+	int mouseON, spritesON;
+	int selectedSprite[4], selectedControlPoint[8], selectedCenter;
+	
+
 	int mousePosX, mousePosY, rad;
 	float width, height;
-    
-    void setup();
-    void setup(int _width, int _height);
-    void setup(int _width, int _height, int grid, int _layer);
 
     void draw(ofTexture texture);
     void defaults();
