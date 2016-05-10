@@ -9,30 +9,30 @@
 
 #include "ofxBezierWarp.h"
 
-//void ofxBezierWarp::setup() {
-//	setup(800, 600, 10, 0);
-//}
+ //void ofxBezierWarp::setup() {
+ //	setup(800, 600, 10, 0);
+ //}
 
-//void ofxBezierWarp::setup(ofFbo* _fbo) {
-//    fbo = _fbo;
-//    setup(fbo->getWidth(), fbo->getHeight(), 10, 0);
-//    m_resultFbo.allocate(fbo->getWidth(), fbo->getHeight());
-//}
+ //void ofxBezierWarp::setup(ofFbo* _fbo) {
+ //    fbo = _fbo;
+ //    setup(fbo->getWidth(), fbo->getHeight(), 10, 0);
+ //    m_resultFbo.allocate(fbo->getWidth(), fbo->getHeight());
+ //}
 
-//void ofxBezierWarp::setup(int w, int h) {
-//	
-//	setup(fbo->getWidth(), fbo->getHeight(), 10, 0);
-//	m_resultFbo.allocate(fbo->getWidth(), fbo->getHeight());
-//}
-//
-//
-//void ofxBezierWarp::setup(int _width, int _height) {
-//    width = _width;
-//	height = _height;
-//    setup(_width, _height, 10, 0);
-//}
+ //void ofxBezierWarp::setup(int w, int h) {
+ //	
+ //	setup(fbo->getWidth(), fbo->getHeight(), 10, 0);
+ //	m_resultFbo.allocate(fbo->getWidth(), fbo->getHeight());
+ //}
+ //
+ //
+ //void ofxBezierWarp::setup(int _width, int _height) {
+ //    width = _width;
+ //	height = _height;
+ //    setup(_width, _height, 10, 0);
+ //}
 
-void ofxBezierWarp::setup(int _width, int _height, ofPtr<ofFbo> screenFboPtr, int grid, int _layer) {
+void ofxBezierWarp::setup(int _id, int _width, int _height, ofPtr<ofFbo> screenFboPtr, int grid) {
 
 	m_srcFbo.allocate(_width, _height);
 	m_resultFbo.allocate(_width, _height);
@@ -41,7 +41,7 @@ void ofxBezierWarp::setup(int _width, int _height, ofPtr<ofFbo> screenFboPtr, in
 
 	width = _width;
 	height = _height;
-	no = _layer;
+	m_id = _id;
 
 	mouseON = 1;
 	spritesON = 1;
@@ -122,22 +122,28 @@ void ofxBezierWarp::draw() {
 
 	////////////////////
 	ofEnableAlphaBlending();
-	m_edgeBlendShader->begin();
-	m_edgeBlendShader->setUniformTexture("tex", m_srcFbo.getTextureReference(), 0);
-	m_edgeBlendShader->setUniform1f("exponent", edgeBlendExponent);
-	m_edgeBlendShader->setUniform1f("userGamma", edgeBlendGamma);
-	m_edgeBlendShader->setUniform3f("userLuminance", edgeBlendLuminance, edgeBlendLuminance, edgeBlendLuminance);
-	m_edgeBlendShader->setUniform4f("amount", edgeBlendAmountLeft, edgeBlendAmountTop, edgeBlendAmountRight, edgeBlendAmountBottom);
-	m_edgeBlendShader->setUniform1i("w", m_srcFbo.getWidth());
-	m_edgeBlendShader->setUniform1i("h", m_srcFbo.getHeight());
+
+	if (m_bBlend)
+	{
+		m_edgeBlendShader->begin();
+		m_edgeBlendShader->setUniformTexture("tex", m_srcFbo.getTextureReference(), 0);
+		m_edgeBlendShader->setUniform1f("exponent", edgeBlendExponent);
+		m_edgeBlendShader->setUniform1f("userGamma", edgeBlendGamma);
+		m_edgeBlendShader->setUniform3f("userLuminance", edgeBlendLuminance, edgeBlendLuminance, edgeBlendLuminance);
+		m_edgeBlendShader->setUniform4f("amount", edgeBlendAmountLeft, edgeBlendAmountTop, edgeBlendAmountRight, edgeBlendAmountBottom);
+		m_edgeBlendShader->setUniform1i("w", m_srcFbo.getWidth());
+		m_edgeBlendShader->setUniform1i("h", m_srcFbo.getHeight());
+	}
 
 	//set ofColor to white
 	ofSetColor(255, 255, 255);
 	m_srcFbo.draw(0, 0);
 	ofDisableAlphaBlending();
 
-
-	m_edgeBlendShader->end();
+	if (m_bBlend)
+	{
+		m_edgeBlendShader->end();
+	}
 
 	if (spritesON == 1) {
 		ofPushStyle();
@@ -375,7 +381,7 @@ float ofxBezierWarp::bezierPoint(float x0, float x1, float x2, float x3, float t
 void ofxBezierWarp::save() {
 
 	// open and write data to the file
-	string _name = "presets_" + ofToString(no) + ".bin";
+	string _name = "presets_" + ofToString(m_id) + ".bin";
 	std::fstream ofs(_name.c_str(), std::ios::out | std::ios::binary);
 	for (int i = 0; i < 4; i++) {
 		ofs.write((const char*)&corners[i].x, sizeof(corners[i].x));
@@ -391,7 +397,7 @@ void ofxBezierWarp::save() {
 //reloads last saved sprites positions
 void ofxBezierWarp::load() {
 	// re-open the file, but this time to read from it
-	string _name = "presets_" + ofToString(no) + ".bin";
+	string _name = "presets_" + ofToString(m_id) + ".bin";
 	std::fstream ifs(_name.c_str(), std::ios::in | std::ios::binary);
 	for (int i = 0; i < 4; i++) {
 		ifs.read((char*)&corners[i].x, sizeof(corners[i].x));
@@ -412,6 +418,8 @@ void ofxBezierWarp::load() {
 
 //handles mouse events 1
 void ofxBezierWarp::mousePressed(int x, int y, int button) {
+
+
 	if (mouseON == 1) {
 		mousePosX = x;
 		mousePosY = y;
@@ -481,19 +489,25 @@ void ofxBezierWarp::mousePressed(int x, int y, int button) {
 		}
 		 */
 	}
+
 }
 
 //handles mouse events 3
 void ofxBezierWarp::mouseDragged(int x, int y, int button) {
+
 	if (mouseON == 1) {
 		mousePosX = x;
 		mousePosY = y;
 	}
+
 }
 
 //handles keyboard events
-void ofxBezierWarp::keyPressed(int key) {
-	switch (key) {
+void ofxBezierWarp::keyPressed(int key)
+{
+
+	switch (key)
+	{
 	case OF_KEY_LEFT:
 		mousePosX--;
 		break;
@@ -506,21 +520,84 @@ void ofxBezierWarp::keyPressed(int key) {
 	case OF_KEY_DOWN:
 		mousePosY++;
 		break;
+
+	case ']': selectNextWidget(); break;
+	case '[': selectPrevWidget(); break;
+
+	case 'a': edgeBlendExponent += 0.01f; break;
+	case 'z': edgeBlendExponent -= 0.01f; break;
+	
+	//case 's': edgeBlendGamma += 0.01f; break;
+	//case 'x': edgeBlendGamma -= 0.01f; break;
+
+	//case 'd': edgeBlendLuminance += 0.01f; break;
+	//case 'c': edgeBlendLuminance -= 0.01f; break;
+
+	case 'q':
+	{
+		edgeBlendAmountLeft -= 0.02f;
+		if (edgeBlendAmountLeft < 0.0f)
+			edgeBlendAmountLeft = 0.0f;
 	}
+	break;
+
+	case 'w':
+		edgeBlendAmountLeft += 0.02f;
+		break;
+
+	case 'e':
+		edgeBlendAmountRight += 0.02f;
+		break;
+
+	case 'r':
+	{
+		edgeBlendAmountRight -= 0.02f;
+		if (edgeBlendAmountRight < 0.0f)
+			edgeBlendAmountRight = 0.0f;
+	}
+	break;
+
+	case 'Q':
+	{
+		edgeBlendAmountLeft -= 0.002f;
+		if (edgeBlendAmountLeft < 0.0f)
+			edgeBlendAmountLeft = 0.0f;
+	}
+	break;
+
+	case 'W':
+		edgeBlendAmountLeft += 0.002f;
+		break;
+
+	case 'E':
+		edgeBlendAmountRight += 0.002f;
+		break;
+
+	case 'R':
+	{
+		edgeBlendAmountRight -= 0.002f;
+		if (edgeBlendAmountRight < 0.0f)
+			edgeBlendAmountRight = 0.0f;
+	}
+	break;
+	}
+
 }
 
 bool ofxBezierWarp::isSelected() {
-	int _sum = 0;
-	_sum += selectedCenter;
-	for (int i = 0; i < 4; i++) {
-		_sum += selectedSprite[i];
-	}
-	if (_sum > 0) {
-		return true;
-	}
-	else {
-		return false;
-	}
+
+	return m_bSelected;
+	//int _sum = 0;
+	//_sum += selectedCenter;
+	//for (int i = 0; i < 4; i++) {
+	//	_sum += selectedSprite[i];
+	//}
+	//if (_sum > 0) {
+	//	return true;
+	//}
+	//else {
+	//	return false;
+	//}
 }
 
 void ofxBezierWarp::setCanvasSize(int _width, int _height) {
@@ -550,6 +627,14 @@ void ofxBezierWarp::setGridVisible(bool _visible) {
 
 void ofxBezierWarp::drawGrid(float _stepX, float _stepY)
 {
+	ofColor gridColor(255, 255, 255, 100);
+	if (m_bSelected)
+	{
+		gridColor.g = 0;
+		gridColor.a = 220;
+	}
+
+
 	float w = m_srcFbo.getWidth();
 	float h = m_srcFbo.getHeight();
 
@@ -559,12 +644,12 @@ void ofxBezierWarp::drawGrid(float _stepX, float _stepY)
 	ofPushStyle();
 	ofEnableBlendMode(OF_BLENDMODE_ADD);
 	for (int y = 0; y <= h; y += perY) {
-		ofSetColor(255, 255, 255, 100);
+		ofSetColor(gridColor);
 		ofSetLineWidth(4);
 		ofDrawLine(0, y, w, y);
 	}
 	for (int x = 0; x <= w; x += perX) {
-		ofSetColor(255, 255, 255, 100);
+		ofSetColor(gridColor);
 		ofSetLineWidth(4);
 		ofDrawLine(x, 0, x, h);
 	}

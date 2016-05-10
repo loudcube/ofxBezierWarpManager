@@ -12,11 +12,20 @@
 
 #include "ofMain.h"
 
+
+struct Widget
+{
+public:
+	ofPoint* pos;
+	int* selected;
+};
+
 class ofxBezierWarp{
 
 public:
-	ofxBezierWarp() {
-		no = 0;
+	ofxBezierWarp()
+	{
+		m_id = 0;
 		layer = 0;
 		gridRes = 0;
 		prev_gridRes = 0;
@@ -24,12 +33,29 @@ public:
 		screen_pos_y = 0.0f;
 		screen_scale_x = 1.0f;
 		screen_scale_y = 1.0f;
+
+		m_bSelected = false;
+		m_bBlend = true;
+
+		int j = 0;
+		for (int i = 0; i != 4; ++i)
+		{
+			m_selectChain[i * 3].selected = &(selectedSprite[i]);
+			m_selectChain[i * 3].pos = &(corners[i]);
+			m_selectChain[i * 3 + 1].selected = &(selectedControlPoint[j]);
+			m_selectChain[i * 3 + 1].pos = &(anchors[j]);
+			++j;
+			m_selectChain[i * 3 + 2].selected = &(selectedControlPoint[j]);
+			m_selectChain[i * 3 + 2].pos = &(anchors[j]);
+			++j;
+		}
+	
 	}
 	
     //void setup(ofFbo* _fbo);
 	//void setup();
 	//void setup(int _width, int _height);
-	void setup(int _width, int _height, ofPtr<ofFbo> screenFboPtr, int grid = 10, int _layer = 0);
+	void setup(int id, int _width, int _height, ofPtr<ofFbo> screenFboPtr, int grid = 10);
 	
 	void update(); // if you need
 	void draw();
@@ -45,17 +71,134 @@ public:
         edgeBlendAmountBottom = 0.0;
     }
 	
+	int getId() { return m_id; }
+	void setId(int id) { m_id = id; }
+
+
     void resetAnchors();
 	void save();
 	void load();
 	void mousePressed(int x, int y, int button);
 	void mouseDragged(int x, int y, int button);
 	void keyPressed(int clef);
-    bool isSelected();
+    
+	void select() { m_bSelected = true; }
+	void deselect() { m_bSelected = false;  }
+	bool isSelected();
     
     void setCanvasSize(int _width, int _height);
     void setWarpResolution(int _res);
     void setGridVisible(bool _visible);
+
+	void toggleBlend()
+	{
+		m_bBlend = !m_bBlend;
+	}
+
+	void selectNextWidget()
+	{
+		if (anchorControl)
+		{
+			for (int i = 0; i != 12; ++i)
+			{
+				if (*(m_selectChain[i].selected) == 1)
+				{
+					*(m_selectChain[i].selected) = 0;
+					if (i == 11)
+					{
+						*(m_selectChain[0].selected) = 1;
+						mousePosX = m_selectChain[0].pos->x;
+						mousePosY = m_selectChain[0].pos->y;
+					}
+					else
+					{
+						*(m_selectChain[i + 1].selected) = 1;
+						mousePosX = m_selectChain[i + 1].pos->x;
+						mousePosY = m_selectChain[i + 1].pos->y;
+					}
+					return;
+				}
+				
+			}
+		}
+		else
+		{
+			for (int i = 0; i != 4; ++i)
+			{
+				if (selectedSprite[i] == 1)
+				{
+					selectedSprite[i] = 0;
+					if (i == 3)
+					{
+						selectedSprite[0] = 1;
+						mousePosX = corners[0].x;
+						mousePosY = corners[0].y;
+					}
+					else
+					{
+						selectedSprite[i + 1] = 1;
+						mousePosX = corners[i + 1].x;
+						mousePosY = corners[i + 1].y;
+					}
+					return;
+				}
+			}
+		}
+	}
+
+	void selectPrevWidget()
+	{
+		if (anchorControl)
+		{
+			for (int i = 0; i != 12; ++i)
+			{
+				if (*(m_selectChain[i].selected) == 1)
+				{
+					*(m_selectChain[i].selected) = 0;
+					if (i == 0)
+					{
+						*(m_selectChain[11].selected) = 1;
+						mousePosX = m_selectChain[11].pos->x;
+						mousePosY = m_selectChain[11].pos->y;
+					}
+					else
+					{
+						*(m_selectChain[i - 1].selected) = 1;
+						mousePosX = m_selectChain[i - 1].pos->x;
+						mousePosY = m_selectChain[i - 1].pos->y;
+					}
+					return;
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i != 4; ++i)
+			{
+				if (selectedSprite[i] == 1)
+				{
+					selectedSprite[i] = 0;
+					if (i == 0)
+					{
+						selectedSprite[3] = 1;
+						mousePosX = corners[3].x;
+						mousePosY = corners[3].y;
+					}
+					else
+					{
+						selectedSprite[i - 1] = 1;
+						mousePosX = corners[i - 1].x;
+						mousePosY = corners[i - 1].y;
+					}
+					return;
+				}
+			}
+
+
+		}
+	}
+
+
     
 //    bool bGradient;
     
@@ -87,7 +230,7 @@ public:
 
 
 private:
-	int no;
+	int m_id;
 	int layer;
 	ofFbo m_srcFbo;
 	ofFbo m_resultFbo;
@@ -96,6 +239,7 @@ private:
 
 	ofPoint center;
 	
+	bool m_bSelected;
 	int mouseON, spritesON;
 	int selectedSprite[4], selectedControlPoint[8], selectedCenter;
 	
@@ -110,4 +254,8 @@ private:
     void drawGrid(float _stepX, float _stepY);
     
     ofShader* m_edgeBlendShader;
+
+	bool m_bBlend;
+
+	Widget m_selectChain[12];
 };
