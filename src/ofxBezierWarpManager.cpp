@@ -240,6 +240,8 @@ bool ofxBezierWarpManager::loadSettings() {
 		}
 		_xml.popTag();
 	}
+
+	return true;
 }
 
 //--------------------------------------------------------------
