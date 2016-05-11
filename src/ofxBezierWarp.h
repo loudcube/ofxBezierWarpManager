@@ -144,6 +144,10 @@ public:
 				}
 			}
 		}
+
+		selectedSprite[0] = 1;
+		mousePosX = corners[0].x;
+		mousePosY = corners[0].y;
 	}
 
 	void selectPrevWidget()
@@ -193,9 +197,11 @@ public:
 					return;
 				}
 			}
-
-
 		}
+
+		selectedSprite[0] = 1;
+		mousePosX = corners[0].x;
+		mousePosY = corners[0].y;
 	}
 
 
