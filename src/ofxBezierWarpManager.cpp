@@ -11,6 +11,7 @@ void ofxBezierWarpManager::loadShaders()
 ofxBezierWarpManager::ofxBezierWarpManager() {
 	bBezierGuide = false;
 	m_selectedId = -1;
+	m_bVisibleAll_flag = true;
 }
 
 //--------------------------------------------------------------
@@ -45,6 +46,18 @@ void ofxBezierWarpManager::keyPressed(int key)
 {
 	switch (key)
 	{
+
+	case '!': m_beziers.at(0)->toggleVisible(); break; // shift - 1
+	case '@': m_beziers.at(1)->toggleVisible(); break; // shift - 2
+	case '#': m_beziers.at(2)->toggleVisible(); break;
+	case '$': m_beziers.at(3)->toggleVisible(); break;
+	case '%': m_beziers.at(4)->toggleVisible(); break;
+	case '^': m_beziers.at(5)->toggleVisible(); break;
+	case '&': m_beziers.at(6)->toggleVisible(); break;
+	case '*': m_beziers.at(7)->toggleVisible(); break;
+	case ')': toggleVisibleSrc(); break; // shift - 0
+
+		
 	case 'g':
 	case 'G': toggleGuideVisible(); return;
 	

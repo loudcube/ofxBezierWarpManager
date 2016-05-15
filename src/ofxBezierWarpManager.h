@@ -43,6 +43,25 @@ public:
 
 	void setGuideVisible(bool _visible, int _bezierNum = -1);
 	void toggleGuideVisible(int _bezierNum = -1);
+	
+	void toggleVisibleSrc()
+	{
+		m_bVisibleAll_flag = !m_bVisibleAll_flag;
+		if (m_bVisibleAll_flag)
+		{
+			for (int i = 0; i != m_beziers.size(); ++i)
+			{
+				m_beziers.at(i)->setVisible(true);
+			}
+		}
+		else
+		{
+			for (int i = 0; i != m_beziers.size(); ++i)
+			{
+				m_beziers.at(i)->setVisible(false);
+			}
+		}
+	}
 
 	int getSelectedId()
 	{
@@ -106,6 +125,8 @@ private:
 	vector< ofPtr<ofxBezierWarp> > m_beziers;
 
 	int m_selectedId;
+
+	bool m_bVisibleAll_flag;
 	
 
 

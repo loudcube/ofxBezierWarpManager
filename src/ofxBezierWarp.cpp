@@ -105,10 +105,11 @@ void ofxBezierWarp::update() {
 	}
 
 	m_srcFbo.begin();
+	ofClear(0);
 	ofPushMatrix();
 	ofTranslate(screen_pos_x, screen_pos_y);
 	ofScale(screen_scale_x, screen_scale_y);
-	m_screenFboPtr->draw(0, 0);
+	if (m_bVisible)	m_screenFboPtr->draw(0, 0);
 	ofPopMatrix();
 	m_srcFbo.end();
 
@@ -508,6 +509,7 @@ void ofxBezierWarp::keyPressed(int key)
 
 	switch (key)
 	{
+		
 	case OF_KEY_LEFT:
 		mousePosX--;
 		break;
@@ -532,6 +534,12 @@ void ofxBezierWarp::keyPressed(int key)
 
 	//case 'd': edgeBlendLuminance += 0.01f; break;
 	//case 'c': edgeBlendLuminance -= 0.01f; break;
+
+	case '1': src_moveToLeft(); break;
+	case '2': src_moveToRight(); break;
+	
+	case '3': src_decScale(); break;
+	case '4': src_incScale(); break;
 
 	case 'q':
 	{
@@ -627,7 +635,7 @@ void ofxBezierWarp::setGridVisible(bool _visible) {
 
 void ofxBezierWarp::drawGrid(float _stepX, float _stepY)
 {
-	ofColor gridColor(255, 255, 255, 100);
+	ofColor gridColor(255, 255, 255, 180);
 	if (m_bSelected)
 	{
 		gridColor.g = 0;

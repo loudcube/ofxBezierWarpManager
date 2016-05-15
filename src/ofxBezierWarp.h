@@ -36,6 +36,7 @@ public:
 
 		m_bSelected = false;
 		m_bBlend = true;
+		m_bVisible = true;
 
 		int j = 0;
 		for (int i = 0; i != 4; ++i)
@@ -74,6 +75,26 @@ public:
 	int getId() { return m_id; }
 	void setId(int id) { m_id = id; }
 
+	void src_moveToLeft(float amount = 1.0f)
+	{	
+		screen_pos_x -= amount;
+	}
+
+	void src_moveToRight(float amount = 1.0f)
+	{
+		screen_pos_x += amount;
+	}
+
+	void src_incScale(float amount = 0.001f)
+	{
+		screen_scale_x += amount;
+	}
+
+	void src_decScale(float amount = 0.001f)
+	{
+		screen_scale_x -= amount;
+	}
+
 
     void resetAnchors();
 	void save();
@@ -90,6 +111,16 @@ public:
     void setWarpResolution(int _res);
     void setGridVisible(bool _visible);
 
+	void toggleVisible()
+	{
+		m_bVisible = !m_bVisible;
+	}
+
+	void setVisible(bool bVisible)
+	{
+		m_bVisible = bVisible;
+	}
+
 	void toggleBlend()
 	{
 		m_bBlend = !m_bBlend;
@@ -97,6 +128,11 @@ public:
 
 	void selectNextWidget()
 	{
+		if (selectedCenter == 1)
+		{
+			return;
+		}
+
 		if (anchorControl)
 		{
 			for (int i = 0; i != 12; ++i)
@@ -262,6 +298,7 @@ private:
     ofShader* m_edgeBlendShader;
 
 	bool m_bBlend;
+	bool m_bVisible;
 
 	Widget m_selectChain[12];
 };
